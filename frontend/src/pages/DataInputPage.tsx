@@ -1,10 +1,12 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Papa from 'papaparse'
 import * as XLSX from 'xlsx'
 import { useData } from '@/hooks/useData'
 import { Dataset, DatasetRow } from '@/types'
 import Navbar from '@/components/Navbar'
+import FileUpload from '@/components/FileUpload'
+import DataTable from '@/components/DataTable'
 
 type Tab = 'file' | 'manual'
 
@@ -19,9 +21,8 @@ const inputStyle = {
 }
 
 export default function DataInputPage() {
-  const { setDataset } = useData()
+  const { setDataset, setCurrentDashboardId } = useData()
   const navigate = useNavigate()
-  const fileRef = useRef<HTMLInputElement>(null)
 
   const [tab, setTab] = useState<Tab>('file')
   const [fileName, setFileName] = useState('')
@@ -30,9 +31,7 @@ export default function DataInputPage() {
   const [datasetName, setDatasetName] = useState('Meu Dataset')
 
   const [manualCols, setManualCols] = useState(['Categoria', 'Valor'])
-  const [manualRows, setManualRows] = useState<string[][]>([
-    ['', ''], ['', ''], ['', ''],
-  ])
+  const [manualRows, setManualRows] = useState<string[][]>([['', ''], ['', ''], ['', '']])
 
   const parseFile = (file: File) => {
     setFileName(file.name)
@@ -54,9 +53,7 @@ export default function DataInputPage() {
       reader.onload = (e) => {
         const text = e.target?.result as string
         Papa.parse(text, {
-          header: true,
-          skipEmptyLines: true,
-          dynamicTyping: true,
+          header: true, skipEmptyLines: true, dynamicTyping: true,
           complete: (result) => {
             const cols = result.meta.fields ?? []
             setColumns(cols)
@@ -68,28 +65,15 @@ export default function DataInputPage() {
     }
   }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    const file = e.dataTransfer.files[0]
-    if (file) parseFile(file)
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) parseFile(file)
-  }
-
   const addManualRow = () => setManualRows(r => [...r, manualCols.map(() => '')])
   const addManualCol = () => {
     setManualCols(c => [...c, `Coluna ${c.length + 1}`])
     setManualRows(r => r.map(row => [...row, '']))
   }
-  const updateCell = (ri: number, ci: number, val: string) => {
+  const updateCell = (ri: number, ci: number, val: string) =>
     setManualRows(r => r.map((row, i) => i === ri ? row.map((c, j) => j === ci ? val : c) : row))
-  }
-  const updateColName = (ci: number, val: string) => {
+  const updateColName = (ci: number, val: string) =>
     setManualCols(c => c.map((col, i) => i === ci ? val : col))
-  }
 
   const handleGenerate = () => {
     let finalCols: string[]
@@ -115,6 +99,7 @@ export default function DataInputPage() {
     }
 
     setDataset(dataset)
+    setCurrentDashboardId(null)
     navigate('/config')
   }
 
@@ -132,12 +117,8 @@ export default function DataInputPage() {
         <div style={{ maxWidth: '760px', margin: '0 auto' }}>
 
           <div style={{ marginBottom: '2rem' }}>
-            <h1 style={{ fontSize: '20px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>
-              Entrada de dados
-            </h1>
-            <p style={{ fontSize: '13px', color: '#7a8fa6', marginTop: '4px' }}>
-              Importe um arquivo ou insira os dados manualmente
-            </p>
+            <h1 style={{ fontSize: '20px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>Entrada de dados</h1>
+            <p style={{ fontSize: '13px', color: '#7a8fa6', marginTop: '4px' }}>Importe um arquivo ou insira os dados manualmente</p>
           </div>
 
           <div style={{ ...card, marginBottom: '1rem' }}>
@@ -166,59 +147,13 @@ export default function DataInputPage() {
 
           {tab === 'file' && (
             <div style={card}>
-              <div
-                onDrop={handleDrop}
-                onDragOver={e => e.preventDefault()}
-                onClick={() => fileRef.current?.click()}
-                style={{
-                  border: '1px dashed rgba(100,160,255,0.3)', borderRadius: '10px',
-                  padding: '3rem 2rem', textAlign: 'center', cursor: 'pointer',
-                  background: 'rgba(13,25,45,0.5)',
-                }}
-              >
-                <div style={{ fontSize: '32px', color: '#4d9de0', marginBottom: '12px' }}>📂</div>
-                <p style={{ fontSize: '14px', color: '#7a8fa6' }}>
-                  {fileName || 'Clique ou arraste seu arquivo aqui'}
-                </p>
-                <span style={{ fontSize: '12px', color: '#3d5068', marginTop: '4px', display: 'block' }}>
-                  CSV, TXT, XLSX, XLS
-                </span>
-              </div>
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".csv,.xlsx,.xls,.txt"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-
+              <FileUpload fileName={fileName} onFile={parseFile} />
               {preview.length > 0 && (
-                <div style={{ marginTop: '1.5rem', overflowX: 'auto' }}>
+                <div style={{ marginTop: '1.5rem' }}>
                   <p style={{ fontSize: '12px', color: '#7a8fa6', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     Preview ({preview.length} linhas)
                   </p>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                    <thead>
-                      <tr>
-                        {columns.map(col => (
-                          <th key={col} style={{ textAlign: 'left', padding: '6px 10px', color: '#7a8fa6', borderBottom: '1px solid rgba(100,160,255,0.15)', whiteSpace: 'nowrap' }}>
-                            {col}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {preview.map((row, i) => (
-                        <tr key={i}>
-                          {columns.map(col => (
-                            <td key={col} style={{ padding: '6px 10px', color: '#c8cdd6', borderBottom: '1px solid rgba(100,160,255,0.08)' }}>
-                              {String(row[col] ?? '')}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <DataTable columns={columns} rows={preview} />
                 </div>
               )}
             </div>
@@ -258,20 +193,15 @@ export default function DataInputPage() {
                   </tbody>
                 </table>
               </div>
-
               <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
                 <button onClick={addManualRow} style={{
                   fontSize: '13px', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer',
                   border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#7a8fa6',
-                }}>
-                  + Linha
-                </button>
+                }}>+ Linha</button>
                 <button onClick={addManualCol} style={{
                   fontSize: '13px', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer',
                   border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#7a8fa6',
-                }}>
-                  + Coluna
-                </button>
+                }}>+ Coluna</button>
               </div>
             </div>
           )}

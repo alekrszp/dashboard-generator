@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useData } from '@/hooks/useData'
 import Navbar from '@/components/Navbar'
+import StatCard from '@/components/StatCard'
 
 interface ActivityItem {
   id: string
@@ -26,7 +27,7 @@ export default function ProfilePage() {
   const activity: ActivityItem[] = history.slice(0, 5).map(d => ({
     id: d.id,
     type: 'created',
-    label: `Dashboard criado`,
+    label: 'Dashboard criado',
     sub: `${d.name} · ${new Date(d.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
   }))
 
@@ -107,21 +108,10 @@ export default function ProfilePage() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px', marginBottom: '1rem' }}>
-            {[
-              { label: 'Dashboards', value: history.length, color: '#4d9de0' },
-              { label: 'Datasets', value: history.length, color: '#4d9de0' },
-              { label: 'Gráficos', value: totalWidgets, color: '#4d9de0' },
-              { label: 'Exportações', value: exportCount, color: '#6ac96a' },
-            ].map(stat => (
-              <div key={stat.label} style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(100,160,255,0.15)',
-                borderRadius: '8px', padding: '1rem', textAlign: 'center',
-              }}>
-                <p style={{ fontSize: '24px', fontWeight: 500, color: stat.color, margin: 0 }}>{stat.value}</p>
-                <p style={{ fontSize: '12px', color: '#7a8fa6', marginTop: '4px' }}>{stat.label}</p>
-              </div>
-            ))}
+            <StatCard label="Dashboards" value={history.length} />
+            <StatCard label="Datasets" value={history.length} />
+            <StatCard label="Gráficos" value={totalWidgets} />
+            <StatCard label="Exportações" value={exportCount} color="#6ac96a" />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -155,7 +145,17 @@ export default function ProfilePage() {
                 Atividade recente
               </p>
               {activity.length === 0 ? (
-                <p style={{ fontSize: '13px', color: '#3d5068' }}>Nenhuma atividade ainda.</p>
+                <div>
+                  <p style={{ fontSize: '13px', color: '#3d5068' }}>Nenhuma atividade ainda.</p>
+                  <button onClick={() => navigate('/')} style={{
+                    marginTop: '8px', fontSize: '12px', padding: '6px 14px',
+                    borderRadius: '6px', cursor: 'pointer',
+                    border: '1px solid rgba(100,160,255,0.2)',
+                    background: 'transparent', color: '#4d9de0',
+                  }}>
+                    Criar primeiro dashboard
+                  </button>
+                </div>
               ) : (
                 activity.map((item, i) => (
                   <div key={item.id} style={{
@@ -170,16 +170,6 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 ))
-              )}
-              {activity.length === 0 && (
-                <button onClick={() => navigate('/')} style={{
-                  marginTop: '8px', fontSize: '12px', padding: '6px 14px',
-                  borderRadius: '6px', cursor: 'pointer',
-                  border: '1px solid rgba(100,160,255,0.2)',
-                  background: 'transparent', color: '#4d9de0',
-                }}>
-                  Criar primeiro dashboard
-                </button>
               )}
             </div>
           </div>
