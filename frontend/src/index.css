@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #0d1117 0%, #0d2137 40%, #0a3060 70%, #1a4a8a 100%);
+  min-height: 100vh;
+  color: #e8eaf0;
+}
+
+input, button, select, textarea {
+  font-family: inherit;
+}
