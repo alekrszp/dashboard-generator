@@ -7,13 +7,13 @@ interface AuthContextType {
   token: string | null
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
+  updateUser: (name: string) => void
   logout: () => void
   isAuthenticated: boolean
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
-// trocar USE_REAL_API para true quando o
-// backend estiver pronto e rodando.
+
 const USE_REAL_API = false
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -60,6 +60,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const updateUser = (name: string) => {
+    if (!user) return
+    const updated = { ...user, name }
+    setUser(updated)
+    localStorage.setItem('user', JSON.stringify(updated))
+  }
+
   const logout = () => {
     setUser(null)
     setToken(null)
@@ -68,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ user, token, login, register, updateUser, logout, isAuthenticated: !!token }}>
       {children}
     </AuthContext.Provider>
   )

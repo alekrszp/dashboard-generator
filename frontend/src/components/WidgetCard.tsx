@@ -1,5 +1,5 @@
 import { Widget, ChartType, Dataset } from '@/types'
-import ChartRenderer from   './ChartRenderer'
+import ChartRenderer from './ChartRenderer'
 import { Draggable } from '@hello-pangea/dnd'
 
 interface WidgetCardProps {
@@ -50,8 +50,13 @@ export default function WidgetCard({ widget: w, index, dataset, editing, onEdit,
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span {...provided.dragHandleProps} style={{ cursor: 'grab', color: '#3d5068', fontSize: '16px' }}>⠿</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span
+                {...provided.dragHandleProps}
+                style={{ cursor: 'grab', color: '#3d5068', fontSize: '13px', letterSpacing: '2px', userSelect: 'none' }}
+              >
+                ····
+              </span>
               <span style={{ fontSize: '14px', fontWeight: 500, color: '#e8eaf0' }}>{w.title}</span>
             </div>
             <div style={{ display: 'flex', gap: '6px' }}>

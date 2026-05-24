@@ -36,7 +36,7 @@ export default function HistoryPage() {
               color: '#fff', border: 'none', borderRadius: '6px',
               padding: '9px 20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
             }}>
-              + Novo dashboard
+              Novo dashboard
             </button>
           </div>
 
@@ -47,7 +47,6 @@ export default function HistoryPage() {
               borderRadius: '10px', padding: '4rem',
               textAlign: 'center',
             }}>
-              <div style={{ fontSize: '40px', marginBottom: '1rem' }}>📊</div>
               <p style={{ color: '#7a8fa6', fontSize: '14px', marginBottom: '1rem' }}>
                 Nenhum dashboard criado ainda.
               </p>
@@ -120,7 +119,7 @@ export default function HistoryPage() {
                   </div>
 
                   <div style={{ marginTop: '12px', textAlign: 'right' }}>
-                    <span style={{ fontSize: '12px', color: '#4d9de0' }}>Abrir dashboard →</span>
+                    <span style={{ fontSize: '12px', color: '#4d9de0' }}>Abrir →</span>
                   </div>
                 </div>
               ))}

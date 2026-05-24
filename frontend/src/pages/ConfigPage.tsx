@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useData } from '@/hooks/useData'
 import { Widget, ChartType } from '@/types'
 import { detectColumns, suggestChartType } from '@/utils/detectColumns'
@@ -34,14 +34,16 @@ const card = {
 export default function ConfigPage() {
   const { dataset } = useData()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const colInfos = dataset ? detectColumns(dataset.columns, dataset.rows) : []
   const numericCols = colInfos.filter(c => c.type === 'numeric')
   const categoryCols = colInfos.filter(c => c.type !== 'numeric')
-
   const defaultXKey = categoryCols[0]?.name ?? dataset?.columns[0] ?? ''
 
   const [widgets, setWidgets] = useState<Widget[]>(() => {
+    if (location.state?.widgets) return location.state.widgets
+
     if (!dataset) return []
     return numericCols.map((col, i) => {
       const xCol = categoryCols[0] ?? colInfos[0]
@@ -60,7 +62,12 @@ export default function ConfigPage() {
   if (!dataset) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#7a8fa6' }}>Nenhum dado encontrado. <span style={{ color: '#4d9de0', cursor: 'pointer' }} onClick={() => navigate('/')}>Voltar</span></p>
+        <p style={{ color: '#7a8fa6' }}>
+          Nenhum dado encontrado.{' '}
+          <span style={{ color: '#4d9de0', cursor: 'pointer' }} onClick={() => navigate('/')}>
+            Voltar
+          </span>
+        </p>
       </div>
     )
   }
@@ -98,12 +105,12 @@ export default function ConfigPage() {
               Configurar dashboard
             </h1>
             <p style={{ fontSize: '13px', color: '#7a8fa6', marginTop: '4px' }}>
-              Dataset: <span style={{ color: '#4d9de0' }}>{dataset.name}</span> —
-              {' '}{dataset.rows.length} linhas · {dataset.columns.length} colunas
+              Dataset: <span style={{ color: '#4d9de0' }}>{dataset.name}</span> —{' '}
+              {dataset.rows.length} linhas · {dataset.columns.length} colunas
             </p>
           </div>
 
-          <div style={{ ...card }}>
+          <div style={card}>
             <p style={{ fontSize: '12px', color: '#7a8fa6', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>
               Colunas detectadas
             </p>
@@ -138,40 +145,58 @@ export default function ConfigPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '1rem' }}>
                 <div>
                   <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Título</label>
-                  <input value={w.title} onChange={e => updateWidget(w.id, { title: e.target.value })}
-                    style={{ ...inputStyle, width: '100%' }} />
+                  <input
+                    value={w.title}
+                    onChange={e => updateWidget(w.id, { title: e.target.value })}
+                    style={{ ...inputStyle, width: '100%' }}
+                  />
                 </div>
                 <div>
                   <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Cor</label>
-                  <input type="color" value={w.color} onChange={e => updateWidget(w.id, { color: e.target.value })}
-                    style={{ ...inputStyle, width: '100%', height: '34px', padding: '2px 6px', cursor: 'pointer' }} />
+                  <input
+                    type="color"
+                    value={w.color}
+                    onChange={e => updateWidget(w.id, { color: e.target.value })}
+                    style={{ ...inputStyle, width: '100%', height: '34px', padding: '2px 6px', cursor: 'pointer' }}
+                  />
                 </div>
                 <div>
                   <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Eixo X (categoria)</label>
-                  <select value={w.xKey} onChange={e => updateWidget(w.id, { xKey: e.target.value })}
-                    style={{ ...inputStyle, width: '100%' }}>
+                  <select
+                    value={w.xKey}
+                    onChange={e => updateWidget(w.id, { xKey: e.target.value })}
+                    style={{ ...inputStyle, width: '100%' }}
+                  >
                     {dataset.columns.map(col => <option key={col} value={col}>{col}</option>)}
                   </select>
                 </div>
                 <div>
                   <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Eixo Y (valor)</label>
-                  <select value={w.yKey} onChange={e => updateWidget(w.id, { yKey: e.target.value })}
-                    style={{ ...inputStyle, width: '100%' }}>
+                  <select
+                    value={w.yKey}
+                    onChange={e => updateWidget(w.id, { yKey: e.target.value })}
+                    style={{ ...inputStyle, width: '100%' }}
+                  >
                     {dataset.columns.map(col => <option key={col} value={col}>{col}</option>)}
                   </select>
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>Tipo de visualização</label>
+                <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                  Tipo de visualização
+                </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                   {CHART_OPTIONS.map(opt => (
-                    <div key={opt.type} onClick={() => updateWidget(w.id, { type: opt.type })}
+                    <div
+                      key={opt.type}
+                      onClick={() => updateWidget(w.id, { type: opt.type })}
                       style={{
                         padding: '10px 12px', borderRadius: '8px', cursor: 'pointer',
                         border: w.type === opt.type ? '1px solid rgba(77,157,224,0.6)' : '1px solid rgba(100,160,255,0.15)',
                         background: w.type === opt.type ? 'rgba(77,157,224,0.1)' : 'rgba(255,255,255,0.02)',
-                      }}>
+                      }}
+                    >
                       <p style={{ fontSize: '13px', fontWeight: 500, color: w.type === opt.type ? '#4d9de0' : '#e8eaf0', margin: 0 }}>
                         {opt.label}
                       </p>

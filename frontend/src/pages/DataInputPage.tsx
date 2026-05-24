@@ -7,6 +7,7 @@ import { Dataset, DatasetRow } from '@/types'
 import Navbar from '@/components/Navbar'
 import FileUpload from '@/components/FileUpload'
 import DataTable from '@/components/DataTable'
+import ExampleModal from '@/components/ExampleModal'
 
 type Tab = 'file' | 'manual'
 
@@ -29,6 +30,7 @@ export default function DataInputPage() {
   const [preview, setPreview] = useState<DatasetRow[]>([])
   const [columns, setColumns] = useState<string[]>([])
   const [datasetName, setDatasetName] = useState('Meu Dataset')
+  const [showExample, setShowExample] = useState(false)
 
   const [manualCols, setManualCols] = useState(['Categoria', 'Valor'])
   const [manualRows, setManualRows] = useState<string[][]>([['', ''], ['', ''], ['', '']])
@@ -74,6 +76,8 @@ export default function DataInputPage() {
     setManualRows(r => r.map((row, i) => i === ri ? row.map((c, j) => j === ci ? val : c) : row))
   const updateColName = (ci: number, val: string) =>
     setManualCols(c => c.map((col, i) => i === ci ? val : col))
+  const removeRow = (ri: number) =>
+    setManualRows(r => r.filter((_, i) => i !== ri))
 
   const handleGenerate = () => {
     let finalCols: string[]
@@ -113,12 +117,19 @@ export default function DataInputPage() {
   return (
     <>
       <Navbar />
+
+      {showExample && <ExampleModal onClose={() => setShowExample(false)} />}
+
       <div style={{ minHeight: '100vh', padding: '2rem', fontFamily: 'Segoe UI, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto' }}>
 
           <div style={{ marginBottom: '2rem' }}>
-            <h1 style={{ fontSize: '20px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>Entrada de dados</h1>
-            <p style={{ fontSize: '13px', color: '#7a8fa6', marginTop: '4px' }}>Importe um arquivo ou insira os dados manualmente</p>
+            <h1 style={{ fontSize: '20px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>
+              Entrada de dados
+            </h1>
+            <p style={{ fontSize: '13px', color: '#7a8fa6', marginTop: '4px' }}>
+              Importe um arquivo ou insira os dados manualmente
+            </p>
           </div>
 
           <div style={{ ...card, marginBottom: '1rem' }}>
@@ -161,6 +172,19 @@ export default function DataInputPage() {
 
           {tab === 'manual' && (
             <div style={card}>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <p style={{ fontSize: '13px', color: '#7a8fa6', margin: 0 }}>
+                  Preencha as colunas e os dados
+                </p>
+                <button onClick={() => setShowExample(true)} style={{
+                  fontSize: '12px', padding: '5px 14px', borderRadius: '6px', cursor: 'pointer',
+                  border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#4d9de0',
+                }}>
+                  Como preencher?
+                </button>
+              </div>
+
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                   <thead>
@@ -174,6 +198,7 @@ export default function DataInputPage() {
                           />
                         </th>
                       ))}
+                      <th style={{ width: '36px' }}></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -188,21 +213,35 @@ export default function DataInputPage() {
                             />
                           </td>
                         ))}
+                        <td style={{ padding: '4px 6px', textAlign: 'center' }}>
+                          <button
+                            onClick={() => removeRow(ri)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f87171', fontSize: '16px' }}
+                          >
+                            ×
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+
               <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
                 <button onClick={addManualRow} style={{
                   fontSize: '13px', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer',
                   border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#7a8fa6',
-                }}>+ Linha</button>
+                }}>
+                  + Linha
+                </button>
                 <button onClick={addManualCol} style={{
                   fontSize: '13px', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer',
                   border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#7a8fa6',
-                }}>+ Coluna</button>
+                }}>
+                  + Coluna
+                </button>
               </div>
+
             </div>
           )}
 

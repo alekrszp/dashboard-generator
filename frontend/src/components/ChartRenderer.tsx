@@ -13,9 +13,18 @@ interface ChartRendererProps {
 }
 
 const COLORS = ['#4d9de0', '#1976d2', '#64b5f6', '#1565c0', '#90caf9', '#0d47a1']
-const tooltipStyle = { background: '#0d1929', border: '1px solid rgba(100,160,255,0.2)', borderRadius: 6, color: '#e8eaf0' }
 const tickStyle = { fill: '#7a8fa6', fontSize: 12 }
 const gridStyle = { strokeDasharray: '3 3', stroke: 'rgba(100,160,255,0.1)' }
+
+const tooltipProps = {
+  contentStyle: {
+    background: '#0d1929',
+    border: '1px solid rgba(100,160,255,0.2)',
+    borderRadius: 6,
+  },
+  labelStyle: { color: '#e8eaf0', fontWeight: 500 },
+  itemStyle: { color: '#4d9de0' },
+}
 
 type ChartFactory = (w: Widget, data: DatasetRow[], columns: string[]) => JSX.Element
 
@@ -26,7 +35,7 @@ const chartRegistry: Record<string, ChartFactory> = {
         <CartesianGrid {...gridStyle} />
         <XAxis dataKey={w.xKey} tick={tickStyle} />
         <YAxis tick={tickStyle} />
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...tooltipProps} />
         <Bar dataKey={w.yKey} fill={w.color ?? '#4d9de0'} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
@@ -37,7 +46,7 @@ const chartRegistry: Record<string, ChartFactory> = {
         <CartesianGrid {...gridStyle} />
         <XAxis dataKey={w.xKey} tick={tickStyle} />
         <YAxis tick={tickStyle} />
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...tooltipProps} />
         <Line type="monotone" dataKey={w.yKey} stroke={w.color ?? '#4d9de0'} strokeWidth={2} dot={{ fill: w.color }} />
       </LineChart>
     </ResponsiveContainer>
@@ -48,7 +57,7 @@ const chartRegistry: Record<string, ChartFactory> = {
         <CartesianGrid {...gridStyle} />
         <XAxis dataKey={w.xKey} tick={tickStyle} />
         <YAxis tick={tickStyle} />
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...tooltipProps} />
         <Area type="monotone" dataKey={w.yKey} stroke={w.color ?? '#4d9de0'} fill={`${w.color ?? '#4d9de0'}33`} strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
@@ -59,7 +68,7 @@ const chartRegistry: Record<string, ChartFactory> = {
         <PolarGrid stroke="rgba(100,160,255,0.15)" />
         <PolarAngleAxis dataKey={w.xKey} tick={tickStyle} />
         <Radar dataKey={w.yKey} stroke={w.color ?? '#4d9de0'} fill={`${w.color ?? '#4d9de0'}33`} strokeWidth={2} />
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...tooltipProps} />
       </RadarChart>
     </ResponsiveContainer>
   ),
@@ -69,7 +78,7 @@ const chartRegistry: Record<string, ChartFactory> = {
         <Pie data={data} dataKey={w.yKey} nameKey={w.xKey} cx="50%" cy="50%" outerRadius={80} label>
           {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
         </Pie>
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...tooltipProps} />
         <Legend wrapperStyle={{ color: '#7a8fa6', fontSize: 12 }} />
       </PieChart>
     </ResponsiveContainer>

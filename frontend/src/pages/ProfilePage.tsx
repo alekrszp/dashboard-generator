@@ -13,7 +13,7 @@ interface ActivityItem {
 }
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth()
+  const { user, logout, updateUser } = useAuth()
   const { history } = useData()
   const navigate = useNavigate()
 
@@ -32,6 +32,7 @@ export default function ProfilePage() {
   }))
 
   const handleSave = () => {
+    updateUser(name)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -135,8 +136,9 @@ export default function ProfilePage() {
                 border: saved ? '1px solid rgba(100,200,100,0.3)' : 'none',
                 borderRadius: '6px', padding: '9px 20px',
                 fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+                transition: 'all 0.2s',
               }}>
-                {saved ? '✓ Salvo' : 'Salvar alterações'}
+                {saved ? 'Salvo' : 'Salvar alterações'}
               </button>
             </div>
 
