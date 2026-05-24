@@ -17,8 +17,10 @@ const tooltipStyle = { background: '#0d1929', border: '1px solid rgba(100,160,25
 const tickStyle = { fill: '#7a8fa6', fontSize: 12 }
 const gridStyle = { strokeDasharray: '3 3', stroke: 'rgba(100,160,255,0.1)' }
 
-export default function ChartRenderer({ widget: w, data, columns }: ChartRendererProps) {
-  if (w.type === 'bar') return (
+type ChartFactory = (w: Widget, data: DatasetRow[], columns: string[]) => JSX.Element
+
+const chartRegistry: Record<string, ChartFactory> = {
+  bar: (w, data) => (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart data={data}>
         <CartesianGrid {...gridStyle} />
@@ -28,9 +30,8 @@ export default function ChartRenderer({ widget: w, data, columns }: ChartRendere
         <Bar dataKey={w.yKey} fill={w.color ?? '#4d9de0'} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
-  )
-
-  if (w.type === 'line') return (
+  ),
+  line: (w, data) => (
     <ResponsiveContainer width="100%" height={220}>
       <LineChart data={data}>
         <CartesianGrid {...gridStyle} />
@@ -40,9 +41,8 @@ export default function ChartRenderer({ widget: w, data, columns }: ChartRendere
         <Line type="monotone" dataKey={w.yKey} stroke={w.color ?? '#4d9de0'} strokeWidth={2} dot={{ fill: w.color }} />
       </LineChart>
     </ResponsiveContainer>
-  )
-
-  if (w.type === 'area') return (
+  ),
+  area: (w, data) => (
     <ResponsiveContainer width="100%" height={220}>
       <AreaChart data={data}>
         <CartesianGrid {...gridStyle} />
@@ -52,9 +52,8 @@ export default function ChartRenderer({ widget: w, data, columns }: ChartRendere
         <Area type="monotone" dataKey={w.yKey} stroke={w.color ?? '#4d9de0'} fill={`${w.color ?? '#4d9de0'}33`} strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
-  )
-
-  if (w.type === 'radar') return (
+  ),
+  radar: (w, data) => (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={data}>
         <PolarGrid stroke="rgba(100,160,255,0.15)" />
@@ -63,9 +62,8 @@ export default function ChartRenderer({ widget: w, data, columns }: ChartRendere
         <Tooltip contentStyle={tooltipStyle} />
       </RadarChart>
     </ResponsiveContainer>
-  )
-
-  if (w.type === 'pie') return (
+  ),
+  pie: (w, data) => (
     <ResponsiveContainer width="100%" height={220}>
       <PieChart>
         <Pie data={data} dataKey={w.yKey} nameKey={w.xKey} cx="50%" cy="50%" outerRadius={80} label>
@@ -75,11 +73,14 @@ export default function ChartRenderer({ widget: w, data, columns }: ChartRendere
         <Legend wrapperStyle={{ color: '#7a8fa6', fontSize: 12 }} />
       </PieChart>
     </ResponsiveContainer>
-  )
-
-  if (w.type === 'table') return (
+  ),
+  table: (_w, data, columns) => (
     <DataTable columns={columns} rows={data} />
-  )
+  ),
+}
 
-  return null
+export default function ChartRenderer({ widget, data, columns }: ChartRendererProps) {
+  const factory = chartRegistry[widget.type]
+  if (!factory) return <p style={{ color: '#f87171', fontSize: '13px' }}>Tipo de gráfico desconhecido.</p>
+  return factory(widget, data, columns)
 }

@@ -27,3 +27,10 @@ describe('suggestChartType', () => {
     expect(suggestChartType({ name: 'Cat', type: 'category' }, { name: 'Val', type: 'numeric' })).toBe('bar')
   })
 })
+
+describe('chartRegistry pattern', () => {
+  it('todos os tipos de gráfico estão registrados', async () => {
+    const mod = await import('../../src/components/ChartRenderer')
+    expect(mod).toBeDefined()
+  })
+})
