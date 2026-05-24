@@ -97,11 +97,3 @@ const USE_REAL_API = false  →  const USE_REAL_API = true
 ```env
 VITE_API_URL=https://url-do-seu-backend.com/api
 ```
-
-## Deploy
-
-Recomendado: [Vercel](https://vercel.com)
-
-## Backend
-
-Repositório da API: https://github.com/alekrszp/dashboard-generator-backend
