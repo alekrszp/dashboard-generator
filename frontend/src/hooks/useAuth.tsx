@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { User } from '@/types'
+import api from '@/services/api'
 
 interface AuthContextType {
   user: User | null
@@ -11,6 +12,9 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
+// trocar USE_REAL_API para true quando o
+// backend estiver pronto e rodando.
+const USE_REAL_API = false
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -19,32 +23,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   })
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
 
-  const login = async (email: string, _password: string) => {
-    const fakeUser: User = {
-      id: '1',
-      name: email.split('@')[0],
-      email,
-      createdAt: new Date().toISOString(),
-    }
-    const fakeToken = 'fake-token-' + Date.now()
-    setUser(fakeUser)
-    setToken(fakeToken)
-    localStorage.setItem('token', fakeToken)
-    localStorage.setItem('user', JSON.stringify(fakeUser))
+  const saveSession = (user: User, token: string) => {
+    setUser(user)
+    setToken(token)
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
   }
 
-  const register = async (name: string, email: string, _password: string) => {
-    const fakeUser: User = {
-      id: '1',
-      name,
-      email,
-      createdAt: new Date().toISOString(),
+  const login = async (email: string, password: string) => {
+    if (USE_REAL_API) {
+      const { data } = await api.post('/auth/login', { email, password })
+      saveSession(data.user, data.token)
+    } else {
+      const fakeUser: User = {
+        id: '1',
+        name: email.split('@')[0],
+        email,
+        createdAt: new Date().toISOString(),
+      }
+      saveSession(fakeUser, 'fake-token-' + Date.now())
     }
-    const fakeToken = 'fake-token-' + Date.now()
-    setUser(fakeUser)
-    setToken(fakeToken)
-    localStorage.setItem('token', fakeToken)
-    localStorage.setItem('user', JSON.stringify(fakeUser))
+  }
+
+  const register = async (name: string, email: string, password: string) => {
+    if (USE_REAL_API) {
+      const { data } = await api.post('/auth/register', { name, email, password })
+      saveSession(data.user, data.token)
+    } else {
+      const fakeUser: User = {
+        id: '1',
+        name,
+        email,
+        createdAt: new Date().toISOString(),
+      }
+      saveSession(fakeUser, 'fake-token-' + Date.now())
+    }
   }
 
   const logout = () => {
