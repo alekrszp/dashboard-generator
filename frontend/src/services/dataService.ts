@@ -3,7 +3,7 @@ import { Dataset, Widget } from '@/types'
 
 // trocar USE_REAL_API para true quando o
 // backend estiver pronto
-const USE_REAL_API = false
+const USE_REAL_API = true
 
 export async function saveDataset(dataset: Dataset): Promise<Dataset> {
   if (USE_REAL_API) {
