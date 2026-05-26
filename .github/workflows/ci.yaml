@@ -27,10 +27,10 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: 'Type check'        # <-- substitui o Lint
+      - name: 'Lint'
         working-directory: frontend
-        run: npx tsc --noEmit
-        
+        run: npx eslint src/ --ext .ts,.tsx
+
       - name: 'Testes'
         working-directory: frontend
         run: npx vitest run --reporter=verbose
