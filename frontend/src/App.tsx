@@ -19,23 +19,29 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return !isAuthenticated ? <>{children}</> : <Navigate to="/" replace />
 }
 
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+      <Route path="/" element={<PrivateRoute><DataInputPage /></PrivateRoute>} />
+      <Route path="/config" element={<PrivateRoute><ConfigPage /></PrivateRoute>} />
+      <Route path="/dashboard/:id" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+      <Route path="/history" element={<PrivateRoute><HistoryPage /></PrivateRoute>} />
+      <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  )
+}
+
 export default function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-            <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
-            <Route path="/" element={<PrivateRoute><DataInputPage /></PrivateRoute>} />
-            <Route path="/config" element={<PrivateRoute><ConfigPage /></PrivateRoute>} />
-            <Route path="/dashboard/:id" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
-            <Route path="/history" element={<PrivateRoute><HistoryPage /></PrivateRoute>} />
-            <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </DataProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <DataProvider>
+          <AppRoutes />
+        </DataProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }

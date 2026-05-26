@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { Dataset, Widget, DashboardAPI } from '@/types'
 import { fetchDashboards, saveDataset, saveDashboardToAPI, updateDashboardOnAPI } from '@/services/dataService'
+import { useAuth } from '@/hooks/useAuth'
 
 export interface SavedDashboard {
   id: string
@@ -17,7 +18,7 @@ interface DataContextType {
   historyLoading: boolean
   historyError: string | null
   saveDashboard: (name: string, dataset: Dataset, widgets: Widget[]) => Promise<string>
-  updateDashboard: (id: string, widgets: Widget[], dataset?: Dataset, name?: string) => void
+  updateDashboard: (id: string, widgets: Widget[], updatedDataset?: Dataset, name?: string) => void
   deleteDashboard: (id: string) => void
   loadDashboard: (id: string) => SavedDashboard | null
   currentDashboardId: string | null
@@ -29,58 +30,24 @@ const DataContext = createContext<DataContextType | null>(null)
 const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true'
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [dataset, setDataset] = useState<Dataset | null>(() => {
-    if (!USE_REAL_API) {
-      try {
-        const saved = localStorage.getItem('mock_dataset')
-        return saved ? JSON.parse(saved) : null
-      } catch {
-        return null
-      }
-    }
-    return null
-  })
-  const [history, setHistory] = useState<SavedDashboard[]>(() => {
-    if (!USE_REAL_API) {
-      try {
-        const saved = localStorage.getItem('mock_history')
-        return saved ? JSON.parse(saved) : []
-      } catch {
-        return []
-      }
-    }
-    return []
-  })
-  const [historyLoading, setHistoryLoading] = useState(() => {
-    if (USE_REAL_API) {
-      const token = localStorage.getItem('token')
-      return !!token
-    }
-    return false
-  })
+  const { token } = useAuth()
+
+  const [dataset, setDataset] = useState<Dataset | null>(null)
+  const [history, setHistory] = useState<SavedDashboard[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
   const [historyError, setHistoryError] = useState<string | null>(null)
   const [currentDashboardId, setCurrentDashboardId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!USE_REAL_API) {
-      localStorage.setItem('mock_history', JSON.stringify(history))
+    if (!token) {
+      setHistory([])
+      setDataset(null)
+      setCurrentDashboardId(null)
+      setHistoryError(null)
+      return
     }
-  }, [history])
 
-  useEffect(() => {
-    if (!USE_REAL_API) {
-      if (dataset) {
-        localStorage.setItem('mock_dataset', JSON.stringify(dataset))
-      } else {
-        localStorage.removeItem('mock_dataset')
-      }
-    }
-  }, [dataset])
-
-  useEffect(() => {
     if (!USE_REAL_API) return
-    const token = localStorage.getItem('token')
-    if (!token) return
 
     setHistoryLoading(true)
     setHistoryError(null)
@@ -105,7 +72,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setHistoryError('Não foi possível carregar os dashboards. Verifique sua conexão.')
       })
       .finally(() => setHistoryLoading(false))
-  }, [])
+  }, [token])
 
   const saveDashboard = async (name: string, dataset: Dataset, widgets: Widget[]): Promise<string> => {
     let finalDataset = dataset
@@ -130,11 +97,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }
 
   const updateDashboard = (id: string, widgets: Widget[], updatedDataset?: Dataset, name?: string) => {
-    setHistory(h => h.map(d => d.id === id ? { 
-      ...d, 
+    setHistory(h => h.map(d => d.id === id ? {
+      ...d,
       widgets,
       dataset: updatedDataset ?? d.dataset,
-      name: name ?? d.name
+      name: name ?? d.name,
     } : d))
     if (USE_REAL_API) updateDashboardOnAPI(id, widgets).catch(() => {})
   }
