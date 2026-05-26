@@ -9,8 +9,18 @@ class DashboardRepository {
   }
 
   async findAllByUserId(userId) {
-    const dashboards = await Dashboard.find({ userId }).sort({ createdAt: -1 });
-    return dashboards.map(d => d.toObject());
+    const dashboards = await Dashboard.find({ userId })
+      .populate('datasetId')
+      .sort({ createdAt: -1 });
+
+    return dashboards.map(d => {
+      const obj = d.toObject();
+      if (obj.datasetId && typeof obj.datasetId === 'object') {
+        obj.dataset = obj.datasetId;
+        obj.datasetId = obj.datasetId.id;
+      }
+      return obj;
+    });
   }
 
   async findByIdAndUserId(id, userId) {
