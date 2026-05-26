@@ -23,11 +23,13 @@ const inputStyle = {
   fontSize: '12px',
   color: '#e8eaf0',
   fontFamily: 'Segoe UI, sans-serif',
+  boxSizing: 'border-box' as const,
 }
 
 const btnGhost = {
   fontSize: '12px', padding: '5px 12px', borderRadius: '6px', cursor: 'pointer',
   border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#7a8fa6',
+  whiteSpace: 'nowrap' as const,
 }
 
 export default function DataEditor({
@@ -42,14 +44,15 @@ export default function DataEditor({
       border: '1px solid rgba(100,160,255,0.2)',
       borderRadius: '10px', padding: '1.5rem',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
         <p style={{ fontSize: '14px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>
           Editar dados
           <span style={{ fontSize: '12px', color: '#7a8fa6', marginLeft: '8px', fontWeight: 400 }}>
             {rows.length} linhas · {columns.length} colunas
           </span>
         </p>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={onAddColumn} style={btnGhost}>+ Coluna</button>
           <button onClick={onAddRow} style={btnGhost}>+ Linha</button>
           {hasUnsavedData && (
@@ -62,8 +65,9 @@ export default function DataEditor({
             border: 'none',
             background: hasUnsavedData ? 'linear-gradient(90deg, #1565c0, #1976d2)' : 'rgba(100,160,255,0.1)',
             color: hasUnsavedData ? '#fff' : '#7a8fa6',
+            whiteSpace: 'nowrap',
           }}>
-            ✓ Aplicar e ver gráficos
+            ✓ Aplicar
           </button>
         </div>
       </div>
@@ -74,12 +78,12 @@ export default function DataEditor({
           borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem',
           fontSize: '13px', color: '#f59e0b',
         }}>
-          ⚠️ Você tem alterações não aplicadas. Clique em "Aplicar e ver gráficos" para atualizar os gráficos.
+          ⚠️ Alterações não aplicadas. Clique em "Aplicar" para atualizar os gráficos.
         </div>
       )}
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any }}>
+        <table style={{ borderCollapse: 'collapse', fontSize: '13px', minWidth: '100%' }}>
           <thead>
             <tr>
               {columns.map(col => (

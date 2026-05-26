@@ -60,6 +60,7 @@ export default function ProfilePage() {
     color: '#e8eaf0',
     fontFamily: 'Segoe UI, sans-serif',
     marginBottom: '12px',
+    boxSizing: 'border-box' as const,
   }
 
   const labelStyle = {
@@ -77,7 +78,7 @@ export default function ProfilePage() {
   return (
     <>
       <Navbar />
-      <div style={{ minHeight: '100vh', padding: '2rem', fontFamily: 'Segoe UI, sans-serif' }}>
+      <div style={{ minHeight: '100vh', padding: '1.5rem 1rem', fontFamily: 'Segoe UI, sans-serif' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 
           <div style={{ marginBottom: '1.5rem' }}>
@@ -85,19 +86,20 @@ export default function ProfilePage() {
             <p style={{ fontSize: '13px', color: '#7a8fa6', marginTop: '4px' }}>Suas informações e atividade</p>
           </div>
 
-          <div style={{ ...card, display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          {/* Avatar card */}
+          <div style={{ ...card, display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{
-              width: '80px', height: '80px', borderRadius: '50%',
+              width: '72px', height: '72px', borderRadius: '50%',
               background: 'linear-gradient(135deg, #1565c0, #4d9de0)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '28px', fontWeight: 600, color: '#fff', flexShrink: 0,
+              fontSize: '26px', fontWeight: 600, color: '#fff', flexShrink: 0,
             }}>
               {initials}
             </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: '20px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>{user?.name}</p>
+            <div style={{ flex: 1, minWidth: '160px' }}>
+              <p style={{ fontSize: '18px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>{user?.name}</p>
               <p style={{ fontSize: '13px', color: '#7a8fa6', marginTop: '3px' }}>{user?.email}</p>
-              <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: 'rgba(77,157,224,0.1)', border: '1px solid rgba(77,157,224,0.2)', color: '#4d9de0' }}>
                   Usuário ativo
                 </span>
@@ -108,14 +110,16 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px', marginBottom: '1rem' }}>
+          {/* Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', marginBottom: '1rem' }}>
             <StatCard label="Dashboards" value={history.length} />
             <StatCard label="Datasets" value={history.length} />
             <StatCard label="Gráficos" value={totalWidgets} />
             <StatCard label="Exportações" value={exportCount} color="#6ac96a" />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          {/* Info + Activity */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
             <div style={card}>
               <p style={{ fontSize: '13px', fontWeight: 500, color: '#e8eaf0', marginBottom: '1rem' }}>
                 Informações pessoais
@@ -176,11 +180,12 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {/* Security */}
           <div style={card}>
             <p style={{ fontSize: '13px', fontWeight: 500, color: '#e8eaf0', marginBottom: '1rem' }}>
               Segurança e sessão
             </p>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <button style={{
                 fontSize: '13px', padding: '8px 18px', borderRadius: '6px', cursor: 'pointer',
                 border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#7a8fa6',

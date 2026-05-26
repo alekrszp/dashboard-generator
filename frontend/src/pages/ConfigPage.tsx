@@ -21,6 +21,8 @@ const inputStyle = {
   padding: '6px 10px',
   fontSize: '13px',
   color: '#e8eaf0',
+  width: '100%',
+  boxSizing: 'border-box' as const,
 }
 
 const card = {
@@ -43,7 +45,6 @@ export default function ConfigPage() {
 
   const [widgets, setWidgets] = useState<Widget[]>(() => {
     if (location.state?.widgets) return location.state.widgets
-
     if (!dataset) return []
     return numericCols.map((col, i) => {
       const xCol = categoryCols[0] ?? colInfos[0]
@@ -61,8 +62,8 @@ export default function ConfigPage() {
 
   if (!dataset) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#7a8fa6' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+        <p style={{ color: '#7a8fa6', textAlign: 'center' }}>
           Nenhum dado encontrado.{' '}
           <span style={{ color: '#4d9de0', cursor: 'pointer' }} onClick={() => navigate('/')}>
             Voltar
@@ -97,7 +98,7 @@ export default function ConfigPage() {
   return (
     <>
       <Navbar />
-      <div style={{ minHeight: '100vh', padding: '2rem', fontFamily: 'Segoe UI, sans-serif' }}>
+      <div style={{ minHeight: '100vh', padding: '1.5rem 1rem', fontFamily: 'Segoe UI, sans-serif' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 
           <div style={{ marginBottom: '2rem' }}>
@@ -130,7 +131,7 @@ export default function ConfigPage() {
 
           {widgets.map((w, idx) => (
             <div key={w.id} style={card}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
                 <span style={{ fontSize: '14px', fontWeight: 500, color: '#e8eaf0' }}>
                   Gráfico {idx + 1}
                 </span>
@@ -142,41 +143,28 @@ export default function ConfigPage() {
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '1rem' }}>
                 <div>
                   <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Título</label>
-                  <input
-                    value={w.title}
-                    onChange={e => updateWidget(w.id, { title: e.target.value })}
-                    style={{ ...inputStyle, width: '100%' }}
-                  />
+                  <input value={w.title} onChange={e => updateWidget(w.id, { title: e.target.value })} style={inputStyle} />
                 </div>
                 <div>
                   <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Cor</label>
                   <input
-                    type="color"
-                    value={w.color}
+                    type="color" value={w.color}
                     onChange={e => updateWidget(w.id, { color: e.target.value })}
-                    style={{ ...inputStyle, width: '100%', height: '34px', padding: '2px 6px', cursor: 'pointer' }}
+                    style={{ ...inputStyle, height: '34px', padding: '2px 6px', cursor: 'pointer' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Eixo X (categoria)</label>
-                  <select
-                    value={w.xKey}
-                    onChange={e => updateWidget(w.id, { xKey: e.target.value })}
-                    style={{ ...inputStyle, width: '100%' }}
-                  >
+                  <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Eixo X</label>
+                  <select value={w.xKey} onChange={e => updateWidget(w.id, { xKey: e.target.value })} style={inputStyle}>
                     {dataset.columns.map(col => <option key={col} value={col}>{col}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Eixo Y (valor)</label>
-                  <select
-                    value={w.yKey}
-                    onChange={e => updateWidget(w.id, { yKey: e.target.value })}
-                    style={{ ...inputStyle, width: '100%' }}
-                  >
+                  <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Eixo Y</label>
+                  <select value={w.yKey} onChange={e => updateWidget(w.id, { yKey: e.target.value })} style={inputStyle}>
                     {dataset.columns.map(col => <option key={col} value={col}>{col}</option>)}
                   </select>
                 </div>
@@ -186,7 +174,7 @@ export default function ConfigPage() {
                 <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                   Tipo de visualização
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
                   {CHART_OPTIONS.map(opt => (
                     <div
                       key={opt.type}
@@ -218,7 +206,7 @@ export default function ConfigPage() {
             + Adicionar gráfico
           </button>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
             <button onClick={() => navigate('/')} style={{
               fontSize: '13px', padding: '9px 20px', borderRadius: '6px', cursor: 'pointer',
               border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#7a8fa6',

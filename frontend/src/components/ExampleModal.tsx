@@ -8,16 +8,19 @@ export default function ExampleModal({ onClose }: ExampleModalProps) {
       position: 'fixed', inset: 0, zIndex: 1000,
       background: 'rgba(0,0,0,0.6)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '1rem',
     }}>
       <div style={{
         background: 'rgba(13,25,45,0.98)',
         border: '1px solid rgba(100,160,255,0.2)',
         borderRadius: '12px',
         overflow: 'hidden',
-        maxWidth: '480px', width: '90%',
+        maxWidth: '480px', width: '100%',
+        maxHeight: '90vh',
+        display: 'flex', flexDirection: 'column',
       }}>
-        <div style={{ height: '3px', background: 'linear-gradient(90deg, #1565c0, #4d9de0)' }} />
-        <div style={{ padding: '1.5rem' }}>
+        <div style={{ height: '3px', background: 'linear-gradient(90deg, #1565c0, #4d9de0)', flexShrink: 0 }} />
+        <div style={{ padding: '1.5rem', overflowY: 'auto' }}>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <p style={{ fontSize: '15px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>
@@ -40,7 +43,7 @@ export default function ExampleModal({ onClose }: ExampleModalProps) {
           </p>
 
           <div style={{ overflowX: 'auto', marginBottom: '1rem' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '300px' }}>
               <thead>
                 <tr>
                   {['Mês', 'Vendas', 'Lucro'].map(col => (

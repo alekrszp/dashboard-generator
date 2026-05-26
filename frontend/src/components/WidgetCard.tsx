@@ -23,8 +23,9 @@ const CHART_TYPES: { type: ChartType; label: string }[] = [
 ]
 
 const btnGhost = {
-  fontSize: '12px', padding: '5px 12px', borderRadius: '6px', cursor: 'pointer',
+  fontSize: '12px', padding: '5px 10px', borderRadius: '6px', cursor: 'pointer',
   border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#7a8fa6',
+  whiteSpace: 'nowrap' as const,
 }
 
 const selectStyle = {
@@ -32,6 +33,7 @@ const selectStyle = {
   border: '1px solid rgba(100,160,255,0.2)',
   borderRadius: '6px', padding: '6px 8px',
   fontSize: '12px', color: '#e8eaf0',
+  boxSizing: 'border-box' as const,
 }
 
 export default function WidgetCard({ widget: w, index, dataset, editing, onEdit, onUpdate, onRemove, onDuplicate }: WidgetCardProps) {
@@ -49,17 +51,20 @@ export default function WidgetCard({ widget: w, index, dataset, editing, onEdit,
             ...provided.draggableProps.style,
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
               <span
                 {...provided.dragHandleProps}
-                style={{ cursor: 'grab', color: '#3d5068', fontSize: '13px', letterSpacing: '2px', userSelect: 'none' }}
+                style={{ cursor: 'grab', color: '#3d5068', fontSize: '13px', letterSpacing: '2px', userSelect: 'none', flexShrink: 0 }}
               >
                 ····
               </span>
-              <span style={{ fontSize: '14px', fontWeight: 500, color: '#e8eaf0' }}>{w.title}</span>
+              <span style={{ fontSize: '14px', fontWeight: 500, color: '#e8eaf0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {w.title}
+              </span>
             </div>
-            <div style={{ display: 'flex', gap: '6px' }}>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flexShrink: 0 }}>
               <button onClick={() => onDuplicate(w)} style={btnGhost}>Duplicar</button>
               <button onClick={() => onEdit(w.id)} style={btnGhost}>
                 {editing === w.id ? 'Fechar' : 'Editar'}
@@ -70,12 +75,13 @@ export default function WidgetCard({ widget: w, index, dataset, editing, onEdit,
             </div>
           </div>
 
+          {/* Edit panel */}
           {editing === w.id && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '1rem', padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px', marginBottom: '1rem', padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
               <div>
                 <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px' }}>TÍTULO</label>
                 <input value={w.title} onChange={e => onUpdate(w.id, { title: e.target.value })}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(100,160,255,0.2)', borderRadius: '6px', padding: '6px 8px', fontSize: '12px', color: '#e8eaf0' }} />
+                  style={{ ...selectStyle, background: 'rgba(255,255,255,0.05)' }} />
               </div>
               <div>
                 <label style={{ fontSize: '11px', color: '#7a8fa6', display: 'block', marginBottom: '4px' }}>TIPO</label>
