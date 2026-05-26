@@ -58,16 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (name: string, email: string, password: string) => {
     if (USE_REAL_API) {
-      const { data } = await api.post('/auth/register', { name, email, password })
-      saveSession(data.user, data.token)
+      await api.post('/auth/register', { name, email, password })
     } else {
-      const fakeUser: User = {
-        id: '1',
-        name,
-        email,
-        createdAt: new Date().toISOString(),
-      }
-      saveSession(fakeUser, 'fake-token-' + Date.now())
     }
   }
 
