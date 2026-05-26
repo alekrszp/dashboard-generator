@@ -19,7 +19,7 @@ export default function RegisterPage() {
     setLoading(true)
     try {
       await register(name, email, password)
-      navigate('/')
+      navigate('/login', { state: { success: 'Conta criada com sucesso! Faça login.' } })
     } catch (err: any) {
       setError(err.response?.data?.error ?? 'Erro ao criar conta')
     } finally {

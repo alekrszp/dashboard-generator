@@ -1,11 +1,14 @@
 import { useState, FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import Logo from '@/components/Logo'
 
 export default function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const successMessage = (location.state as any)?.success ?? ''
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -54,6 +57,17 @@ export default function LoginPage() {
           borderRadius: '10px',
           padding: '1.75rem',
         }}>
+          {successMessage && (
+            <p style={{
+              fontSize: '13px', color: '#6ac96a',
+              background: 'rgba(100, 200, 100, 0.1)',
+              border: '1px solid rgba(100, 200, 100, 0.2)',
+              borderRadius: '6px', padding: '8px 12px', marginBottom: '1rem',
+            }}>
+              {successMessage}
+            </p>
+          )}
+
           {error && (
             <p style={{
               fontSize: '13px', color: '#f87171',
