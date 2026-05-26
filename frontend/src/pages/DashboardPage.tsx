@@ -34,6 +34,7 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<Tab>('charts')
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState(false)
   const [dashTitle, setDashTitle] = useState(savedDash?.name ?? ctxDataset?.name ?? 'Meu Dashboard')
@@ -67,16 +68,20 @@ export default function DashboardPage() {
   useEffect(() => {
     if (dataset && widgets.length > 0 && !hasSaved.current && !fromHistory && id === 'new') {
       const doSave = async () => {
-        let newId: string
-        if (!currentDashboardId) {
-          newId = await saveDashboard(dashTitle, dataset, widgets)
-        } else {
-          updateDashboard(currentDashboardId, widgets)
-          newId = currentDashboardId
+        try {
+          let newId: string
+          if (!currentDashboardId) {
+            newId = await saveDashboard(dashTitle, dataset, widgets)
+          } else {
+            updateDashboard(currentDashboardId, widgets)
+            newId = currentDashboardId
+          }
+          navigate(`/dashboard/${newId}`, { replace: true, state: { widgets, fromHistory: false } })
+          hasSaved.current = true
+          setSaved(true)
+        } catch {
+          setSaveError('Não foi possível salvar o dashboard. Verifique sua conexão e tente novamente.')
         }
-        navigate(`/dashboard/${newId}`, { replace: true, state: { widgets, fromHistory: false } })
-        hasSaved.current = true
-        setSaved(true)
       }
       doSave()
     }
@@ -199,7 +204,7 @@ export default function DashboardPage() {
     return (
       <>
         <Navbar />
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: '#7a8fa6', marginBottom: '1rem' }}>Nenhum dado encontrado.</p>
             <button onClick={() => navigate('/')} style={{
@@ -225,8 +230,24 @@ export default function DashboardPage() {
         />
       )}
 
-      <div style={{ minHeight: '100vh', padding: '2rem', fontFamily: 'Segoe UI, sans-serif' }}>
+      <div style={{ minHeight: '100vh', padding: '1.5rem 1rem', fontFamily: 'Segoe UI, sans-serif' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+
+          {saveError && (
+            <div style={{
+              background: 'rgba(248,113,113,0.1)',
+              border: '1px solid rgba(248,113,113,0.2)',
+              borderRadius: '8px', padding: '12px 16px',
+              marginBottom: '1rem', fontSize: '13px', color: '#f87171',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px',
+            }}>
+              <span>⚠️ {saveError}</span>
+              <button
+                onClick={() => setSaveError(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f87171', fontSize: '16px', padding: 0 }}
+              >×</button>
+            </div>
+          )}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '12px' }}>
             <div>
@@ -239,7 +260,7 @@ export default function DashboardPage() {
                   style={{
                     fontSize: '20px', fontWeight: 500, background: 'transparent',
                     border: 'none', borderBottom: '1px solid rgba(100,160,255,0.4)',
-                    color: '#e8eaf0', outline: 'none', width: '300px',
+                    color: '#e8eaf0', outline: 'none', width: '300px', maxWidth: '100%',
                   }}
                 />
               ) : (

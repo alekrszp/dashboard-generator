@@ -5,7 +5,7 @@ import { formatDateTime } from '@/utils/formatters'
 import Navbar from '@/components/Navbar'
 
 export default function HistoryPage() {
-  const { history, historyLoading, setDataset, deleteDashboard } = useData()
+  const { history, historyLoading, historyError, setDataset, deleteDashboard } = useData()
   const navigate = useNavigate()
 
   const handleOpen = (dash: SavedDashboard) => {
@@ -16,16 +16,16 @@ export default function HistoryPage() {
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
     deleteDashboard(id)
-    try { await deleteDashboardOnAPI(id) } catch { /* silently fail */ }
+    try { await deleteDashboardOnAPI(id) } catch { /* silently fail — já removeu do estado */ }
   }
 
   return (
     <>
       <Navbar />
-      <div style={{ minHeight: '100vh', padding: '2rem', fontFamily: 'Segoe UI, sans-serif' }}>
+      <div style={{ minHeight: '100vh', padding: '1.5rem 1rem', fontFamily: 'Segoe UI, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
 
-          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <h1 style={{ fontSize: '20px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>
                 Meus Dashboards
@@ -42,6 +42,17 @@ export default function HistoryPage() {
               Novo dashboard
             </button>
           </div>
+
+          {historyError && (
+            <div style={{
+              background: 'rgba(248,113,113,0.1)',
+              border: '1px solid rgba(248,113,113,0.2)',
+              borderRadius: '8px', padding: '12px 16px',
+              marginBottom: '1rem', fontSize: '13px', color: '#f87171',
+            }}>
+              ⚠️ {historyError}
+            </div>
+          )}
 
           {historyLoading ? (
             <div style={{ textAlign: 'center', padding: '4rem', color: '#7a8fa6', fontSize: '14px' }}>
@@ -66,7 +77,7 @@ export default function HistoryPage() {
               </button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
               {history.map(dash => (
                 <div
                   key={dash.id}
@@ -80,9 +91,9 @@ export default function HistoryPage() {
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(100,160,255,0.5)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(100,160,255,0.2)'}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                    <div>
-                      <p style={{ fontSize: '15px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '8px' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontSize: '15px', fontWeight: 500, color: '#e8eaf0', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {dash.name}
                       </p>
                       <p style={{ fontSize: '12px', color: '#7a8fa6', marginTop: '3px' }}>
@@ -94,13 +105,14 @@ export default function HistoryPage() {
                       style={{
                         fontSize: '11px', padding: '3px 10px', borderRadius: '6px', cursor: 'pointer',
                         border: '1px solid rgba(248,113,113,0.2)', background: 'transparent', color: '#f87171',
+                        flexShrink: 0,
                       }}
                     >
                       Excluir
                     </button>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '12px', padding: '3px 10px', borderRadius: '20px', background: 'rgba(77,157,224,0.1)', border: '1px solid rgba(77,157,224,0.2)', color: '#4d9de0' }}>
                       {dash.dataset.rows.length} linhas
                     </span>

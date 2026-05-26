@@ -39,3 +39,18 @@ export interface Dashboard {
   createdAt: string
   updatedAt: string
 }
+
+export interface DashboardAPI {
+  id: string
+  name: string
+  datasetId: string
+  dataset?: {
+    id: string
+    name: string
+    columns: string[]
+    rows: DatasetRow[]
+    createdAt: string
+  }
+  widgets: Widget[]
+  createdAt: string
+}

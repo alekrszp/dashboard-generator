@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Dataset, Widget } from '@/types'
+import { Dataset, Widget, DashboardAPI } from '@/types'
 import { fetchDashboards, saveDataset, saveDashboardToAPI, updateDashboardOnAPI } from '@/services/dataService'
 
 export interface SavedDashboard {
@@ -15,6 +15,7 @@ interface DataContextType {
   setDataset: (dataset: Dataset | null) => void
   history: SavedDashboard[]
   historyLoading: boolean
+  historyError: string | null
   saveDashboard: (name: string, dataset: Dataset, widgets: Widget[]) => Promise<string>
   updateDashboard: (id: string, widgets: Widget[]) => void
   deleteDashboard: (id: string) => void
@@ -31,6 +32,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [dataset, setDataset] = useState<Dataset | null>(null)
   const [history, setHistory] = useState<SavedDashboard[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState<string | null>(null)
   const [currentDashboardId, setCurrentDashboardId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -39,9 +41,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!token) return
 
     setHistoryLoading(true)
+    setHistoryError(null)
     fetchDashboards()
-      .then((items) => {
-        const mapped: SavedDashboard[] = items.map((d: any) => ({
+      .then((items: DashboardAPI[]) => {
+        const mapped: SavedDashboard[] = items.map((d) => ({
           id: d.id,
           name: d.name,
           dataset: d.dataset ?? {
@@ -56,7 +59,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }))
         setHistory(mapped)
       })
-      .catch(() => {})
+      .catch(() => {
+        setHistoryError('Não foi possível carregar os dashboards. Verifique sua conexão.')
+      })
       .finally(() => setHistoryLoading(false))
   }, [])
 
@@ -65,13 +70,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     let id = Date.now().toString()
 
     if (USE_REAL_API) {
-      try {
-        const savedDataset = await saveDataset(dataset)
-        finalDataset = savedDataset
-        id = await saveDashboardToAPI(name, savedDataset.id, widgets)
-      } catch {
-        id = Date.now().toString()
-      }
+      const savedDataset = await saveDataset(dataset)
+      finalDataset = savedDataset
+      id = await saveDashboardToAPI(name, savedDataset.id, widgets)
     }
 
     const newDash: SavedDashboard = {
@@ -101,7 +102,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   return (
     <DataContext.Provider value={{
       dataset, setDataset,
-      history, historyLoading,
+      history, historyLoading, historyError,
       saveDashboard, updateDashboard, deleteDashboard, loadDashboard,
       currentDashboardId, setCurrentDashboardId,
     }}>
