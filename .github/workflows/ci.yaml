@@ -22,8 +22,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
-      
-      - name: 'Instalar Dependencias'
+
+      - name: 'Instalar dependências'
         working-directory: frontend
         run: npm ci
 
@@ -35,8 +35,11 @@ jobs:
         working-directory: frontend
         run: npx vitest run --reporter=verbose
 
-      - name: 'Build de Producao'
+      - name: 'Build de produção'
         working-directory: frontend
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_USE_REAL_API: ${{ secrets.VITE_USE_REAL_API }}
         run: npm run build
 
       - name: 'Upload de artefato de build'
@@ -44,14 +47,14 @@ jobs:
         with:
           name: frontend-dist
           path: frontend/dist/
-    
+
   ci-backend:
     name: 'Backend (Node.js)'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
-      - name: 'Checkout de código'
+      - name: 'Checkout do código'
         uses: actions/checkout@v4
 
       - name: 'Setup Node.js'
@@ -61,13 +64,13 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
-      - name: 'Instalar Dependencias'
+      - name: 'Instalar dependências'
         working-directory: backend
         run: npm ci
 
-      - name: 'Lint'
-        working-directory: backend
-        run: npx eslint src/ --ext .js,.ts || true
-
       - name: 'Testes'
-        run: npm test || true
+        working-directory: backend
+        env:
+          JWT_SECRET: test_secret_for_ci_only_32chars!!
+          NODE_ENV: test
+        run: npm test
