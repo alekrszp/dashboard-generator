@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid'; // Correção do import do UUID
+import { v4 as uuidv4 } from 'uuid';
 import UserRepository from '../repositories/UserRepository.js';
 
 class AuthService {
@@ -20,14 +20,13 @@ class AuthService {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await UserRepository.create({
-      id: uuidv4(), // Utilizando a função correta do uuid v4
+      id: uuidv4(),
       name,
       email,
       password: hashedPassword
     });
 
-    // Correção: Passando o ID real gerado e não a propriedade inexistente 'uuid4'
-    const token = this.generateToken(newUser.id); 
+    const token = this.generateToken(newUser.id);
 
     return {
       user: {
@@ -73,10 +72,10 @@ class AuthService {
   }
 
   generateToken(userId) {
-    const secret = process.env.JWT_SECRET || 'fallback_secret_key';
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET environment variable is not set.');
     return jwt.sign({ userId }, secret, { expiresIn: '7d' });
   }
 }
 
-// Exportando a instância da classe de forma limpa
 export default new AuthService();

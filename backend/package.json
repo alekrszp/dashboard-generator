@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --forceExit"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -16,5 +17,15 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.1",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "extensionsToTreatAsEsm": [".js"],
+    "transform": {},
+    "testMatch": ["**/test/**/*.test.js"]
   }
 }
