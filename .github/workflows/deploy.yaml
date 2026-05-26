@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: 'Disparar deploy do frontend no Render'
-        run: 'CURL -X POST "${{secrets.RENDER_DEPLOY_HOOK_FRONTEND}}"'
+        run: 'curl -X POST "${{secrets.RENDER_DEPLOY_HOOK_FRONTEND}}"'
 
       - name: 'Disparar deploy do backend no Render'
-        run: 'CURL -X POST "${{secrets.RENDER_DEPLOY_HOOK_BACKEND}}"'
+        run: 'curl -X POST "${{secrets.RENDER_DEPLOY_HOOK_BACKEND}}"'
