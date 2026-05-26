@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid'; // Correção do import do UUID
 import UserRepository from '../repositories/UserRepository.js';
 
 class AuthService {
@@ -19,12 +20,14 @@ class AuthService {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await UserRepository.create({
+      id: uuidv4(), // Utilizando a função correta do uuid v4
       name,
       email,
       password: hashedPassword
     });
 
-    const token = this.generateToken(newUser.id);
+    // Correção: Passando o ID real gerado e não a propriedade inexistente 'uuid4'
+    const token = this.generateToken(newUser.id); 
 
     return {
       user: {
@@ -75,4 +78,5 @@ class AuthService {
   }
 }
 
+// Exportando a instância da classe de forma limpa
 export default new AuthService();
