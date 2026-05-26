@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import Logo from '@/components/Logo'
 
 export default function RegisterPage() {
   const { register } = useAuth()
@@ -37,6 +38,9 @@ export default function RegisterPage() {
       <div style={{ width: '100%', maxWidth: '360px' }}>
 
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+            <Logo size={72} />
+          </div>
           <h1 style={{ fontSize: '22px', fontWeight: 500, color: '#e8eaf0', margin: 0 }}>
             Dashboard Generator
           </h1>
@@ -88,6 +92,7 @@ export default function RegisterPage() {
                     border: '1px solid rgba(100, 160, 255, 0.2)',
                     borderRadius: '6px', padding: '9px 12px',
                     fontSize: '14px', color: '#e8eaf0',
+                    boxSizing: 'border-box',
                   }}
                 />
               </div>

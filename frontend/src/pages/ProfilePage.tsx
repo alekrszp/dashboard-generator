@@ -19,16 +19,17 @@ export default function ProfilePage() {
 
   const [name, setName] = useState(user?.name ?? '')
   const [saved, setSaved] = useState(false)
-  const [exportCount] = useState(() => Math.floor(Math.random() * 10))
 
   const totalWidgets = history.reduce((acc, d) => acc + d.widgets.length, 0)
+  const totalDatasets = history.length
+  const totalDashboards = history.length
   const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'U'
 
   const activity: ActivityItem[] = history.slice(0, 5).map(d => ({
     id: d.id,
     type: 'created',
     label: 'Dashboard criado',
-    sub: `${d.name} · ${new Date(d.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+    sub: `${d.name} · ${new Date(d.createdAt).toLocaleDateString('pt-BR')}`,
   }))
 
   const handleSave = () => {
@@ -110,12 +111,11 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', marginBottom: '1rem' }}>
-            <StatCard label="Dashboards" value={history.length} />
-            <StatCard label="Datasets" value={history.length} />
-            <StatCard label="Gráficos" value={totalWidgets} />
-            <StatCard label="Exportações" value={exportCount} color="#6ac96a" />
+          {/* Stats — valores reais */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '1rem' }}>
+            <StatCard label="Dashboards" value={totalDashboards} />
+            <StatCard label="Datasets" value={totalDatasets} />
+            <StatCard label="Gráficos criados" value={totalWidgets} />
           </div>
 
           {/* Info + Activity */}
@@ -142,7 +142,7 @@ export default function ProfilePage() {
                 fontSize: '13px', fontWeight: 500, cursor: 'pointer',
                 transition: 'all 0.2s',
               }}>
-                {saved ? 'Salvo' : 'Salvar alterações'}
+                {saved ? 'Salvo ✓' : 'Salvar alterações'}
               </button>
             </div>
 
@@ -170,9 +170,9 @@ export default function ProfilePage() {
                     borderBottom: i < activity.length - 1 ? '1px solid rgba(100,160,255,0.08)' : 'none',
                   }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: dotColor(item.type), flexShrink: 0 }} />
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <p style={{ fontSize: '13px', color: '#c8cdd6', margin: 0 }}>{item.label}</p>
-                      <p style={{ fontSize: '11px', color: '#3d5068', marginTop: '2px' }}>{item.sub}</p>
+                      <p style={{ fontSize: '11px', color: '#3d5068', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.sub}</p>
                     </div>
                   </div>
                 ))
@@ -180,25 +180,17 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Security */}
+          {/* Sessão — sem botão de alterar senha */}
           <div style={card}>
             <p style={{ fontSize: '13px', fontWeight: 500, color: '#e8eaf0', marginBottom: '1rem' }}>
-              Segurança e sessão
+              Sessão
             </p>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <button style={{
-                fontSize: '13px', padding: '8px 18px', borderRadius: '6px', cursor: 'pointer',
-                border: '1px solid rgba(100,160,255,0.2)', background: 'transparent', color: '#7a8fa6',
-              }}>
-                Alterar senha
-              </button>
-              <button onClick={handleLogout} style={{
-                fontSize: '13px', padding: '8px 18px', borderRadius: '6px', cursor: 'pointer',
-                border: '1px solid rgba(248,113,113,0.2)', background: 'transparent', color: '#f87171',
-              }}>
-                Sair da conta
-              </button>
-            </div>
+            <button onClick={handleLogout} style={{
+              fontSize: '13px', padding: '8px 18px', borderRadius: '6px', cursor: 'pointer',
+              border: '1px solid rgba(248,113,113,0.2)', background: 'transparent', color: '#f87171',
+            }}>
+              Sair da conta
+            </button>
           </div>
 
         </div>

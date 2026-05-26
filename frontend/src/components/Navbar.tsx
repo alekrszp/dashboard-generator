@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useData } from '@/hooks/useData'
+import Logo from '@/components/Logo'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -28,26 +29,20 @@ export default function Navbar() {
       borderBottom: '1px solid rgba(100, 160, 255, 0.15)',
       backdropFilter: 'blur(10px)',
     }}>
-      {/* Main bar */}
       <div style={{
         padding: '0 1rem',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         height: '52px', gap: '8px',
       }}>
         {/* Logo */}
-        <div onClick={() => navigate('/')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <div style={{
-            width: '28px', height: '28px', borderRadius: '6px',
-            background: 'linear-gradient(135deg, #1565c0, #4d9de0)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '14px', fontWeight: 700, color: '#fff',
-          }}>D</div>
+        <div onClick={() => navigate('/')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+          <Logo size={32} />
           <span style={{ fontSize: '15px', fontWeight: 500, color: '#e8eaf0', whiteSpace: 'nowrap' }}>
             Dashboard Generator
           </span>
         </div>
 
-        {/* Desktop nav — hidden on mobile via inline media not possible, use className trick */}
+        {/* Desktop nav */}
         <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           {['/', '/history'].map((path, i) => (
             <button key={path} onClick={() => navigate(path)} style={{
