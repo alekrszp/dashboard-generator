@@ -1,13 +1,17 @@
 # Dashboard Generator
 
-Aplicação web para geração de dashboards interativos a partir de dados importados via CSV, Excel, TXT ou inseridos manualmente.
+Aplicação web fullstack para geração de dashboards interativos a partir de dados importados via CSV, Excel, TXT ou inseridos manualmente.
 
-## Sobre o projeto
+## 🔗 Links
 
-O usuário importa seus dados, o sistema detecta automaticamente os tipos de colunas e sugere visualizações. É possível configurar, editar e exportar dashboards com múltiplos tipos de gráficos.
+- **Frontend:** https://dashboard-generator-frontend.onrender.com
+- **Backend:** https://dashboard-generator-f805.onrender.com
 
-## Funcionalidades
+---
 
+## ✨ Funcionalidades
+
+- Autenticação com JWT (registro, login, logout)
 - Importação de dados via CSV, Excel, TXT ou entrada manual
 - Detecção automática de tipos de colunas (numérico, categoria, data)
 - Geração automática de dashboards com sugestão de gráficos
@@ -16,84 +20,164 @@ O usuário importa seus dados, o sistema detecta automaticamente os tipos de col
 - Edição dos dados diretamente no dashboard
 - Duplicar e reordenar widgets via drag and drop
 - Exportar dashboard como PNG ou CSV
-- Histórico de dashboards com URL própria por dashboard
+- Histórico de dashboards persistido no banco de dados
 - Tela de perfil com estatísticas de uso
-- Autenticação com JWT (pronto para integração com backend)
 
-## Tecnologias
+---
 
+## 🛠 Tecnologias
+
+### Frontend
 - React 18 + TypeScript
 - Vite
-- Recharts (gráficos)
+- Recharts
 - TailwindCSS
 - Axios
-- PapaParse (parse CSV)
-- SheetJS (parse Excel)
-- @hello-pangea/dnd (drag and drop)
-- html2canvas (exportar PNG)
-- Vitest (testes)
+- PapaParse
+- SheetJS
+- @hello-pangea/dnd
+- html2canvas
+- Vitest + Testing Library
 
-## Padrões aplicados
+### Backend
+- Node.js + Express
+- MongoDB + Mongoose
+- JWT + bcryptjs
+- UUID
+- Jest + Supertest
+
+---
+
+## 🎨 Padrões aplicados
 
 - **Observer** — Context API (`useAuth`, `useData`) notifica componentes automaticamente
 - **Table-Driven** — `ChartRenderer` elimina if/else com objeto de mapeamento
 - **Single Responsibility** — cada arquivo tem uma responsabilidade única
 - **Open/Closed** — novos tipos de gráfico sem modificar código existente
+- **Repository Pattern** — acesso ao banco isolado nos repositories
 
-## Instalação e execução local
+---
+
+## 🚀 Rodando localmente
 
 ### Pré-requisitos
 
-- Node.js 18+
+- Node.js 20+
+- MongoDB Atlas (ou instância local)
 
-### Passos
+### Backend
 
 ```bash
-# instalar dependências
+cd backend
 npm install
-
-# copiar variáveis de ambiente
 cp .env.example .env
-
-# rodar em desenvolvimento
+# preencher as variáveis no .env
 npm run dev
 ```
 
-A aplicação estará disponível em `http://localhost:5173`
-
-### Testes
+### Frontend
 
 ```bash
-npx vitest run
+cd frontend
+npm install
+cp .env.example .env
+# preencher as variáveis no .env
+npm run dev
 ```
 
-### Build para produção
+Frontend disponível em `http://localhost:5173`  
+Backend disponível em `http://localhost:3333`
+
+---
+
+## ⚙️ Variáveis de ambiente
+
+### Frontend — `frontend/.env`
+
+```env
+VITE_API_URL=https://dashboard-generator-f805.onrender.com
+VITE_USE_REAL_API=true
+```
+
+Para rodar sem backend, deixe `VITE_USE_REAL_API=false`.
+
+### Backend — `backend/.env`
+
+```env
+PORT=3333
+MONGO_URI=mongodb+srv://<usuario>:<senha>@<host>/<database>
+JWT_SECRET=sua_chave_secreta_minimo_32_caracteres
+FRONTEND_URL_DEV=http://localhost:5173
+FRONTEND_URL_PROD=https://dashboard-generator-frontend.onrender.com
+```
+
+---
+
+## 🧪 Testes
+
+### Frontend
 
 ```bash
-npm run build
+cd frontend
+npx vitest run --reporter=verbose
 ```
 
-## Variáveis de ambiente
+### Backend
 
-```env
-VITE_API_URL=http://localhost:3333/api
+```bash
+cd backend
+npm test
 ```
 
-## Integração com backend
+---
 
-O frontend está preparado para integração com qualquer backend REST. Para ativar:
+## 📦 CI/CD
 
-1. Em `src/hooks/useAuth.tsx` mude:
-```ts
-const USE_REAL_API = false  →  const USE_REAL_API = true
-```
+O projeto usa GitHub Actions com dois workflows:
 
-2. Em `src/services/dataService.ts` mude:
-```ts
-const USE_REAL_API = false  →  const USE_REAL_API = true
-```
+- **CI** (`ci.yaml`) — roda a cada push no `main`:
+  - Type check do TypeScript
+  - Testes do frontend (Vitest)
+  - Build de produção
+  - Testes do backend (Jest + Supertest)
 
-3. Configure a URL no `.env`:
-```env
-VITE_API_URL=https://url-do-seu-backend.com/api
-```
+- **CD** (`deploy.yaml`) — roda após o CI passar:
+  - Dispara deploy automático no Render via webhook
+
+### Secrets necessários no GitHub
+
+| Secret | Descrição |
+|---|---|
+| `VITE_API_URL` | URL do backend em produção |
+| `VITE_USE_REAL_API` | `true` para produção |
+| `RENDER_DEPLOY_HOOK_FRONTEND` | Webhook do Render do frontend |
+| `RENDER_DEPLOY_HOOK_BACKEND` | Webhook do Render do backend |
+
+---
+
+## 📡 API
+
+### Auth
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/api/auth/register` | Registrar usuário |
+| POST | `/api/auth/login` | Fazer login |
+
+### Datasets
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/api/datasets` | Criar dataset |
+| GET | `/api/datasets` | Listar datasets do usuário |
+| GET | `/api/datasets/:id` | Buscar dataset por ID |
+| DELETE | `/api/datasets/:id` | Deletar dataset |
+
+### Dashboards
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/api/dashboards` | Criar dashboard |
+| GET | `/api/dashboards` | Listar dashboards do usuário |
+| GET | `/api/dashboards/:id` | Buscar dashboard por ID |
+| PUT | `/api/dashboards/:id` | Atualizar widgets |
+| DELETE | `/api/dashboards/:id` | Deletar dashboard |
+
+> Todas as rotas de datasets e dashboards requerem autenticação via `Authorization: Bearer <token>`.
