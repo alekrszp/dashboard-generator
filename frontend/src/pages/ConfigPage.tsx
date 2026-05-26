@@ -34,9 +34,10 @@ const card = {
 }
 
 export default function ConfigPage() {
-  const { dataset } = useData()
+  const { dataset, updateDashboard } = useData()
   const navigate = useNavigate()
   const location = useLocation()
+  const dashboardId = location.state?.dashboardId
 
   const colInfos = dataset ? detectColumns(dataset.columns, dataset.rows) : []
   const numericCols = colInfos.filter(c => c.type === 'numeric')
@@ -92,7 +93,12 @@ export default function ConfigPage() {
 
   const handleGenerate = () => {
     if (!widgets.length) return alert('Adicione pelo menos um gráfico!')
-    navigate('/dashboard/new', { state: { widgets } })
+    if (dashboardId && dashboardId !== 'new') {
+      updateDashboard(dashboardId, widgets)
+      navigate(`/dashboard/${dashboardId}`, { state: { widgets, fromHistory: true } })
+    } else {
+      navigate('/dashboard/new', { state: { widgets } })
+    }
   }
 
   return (

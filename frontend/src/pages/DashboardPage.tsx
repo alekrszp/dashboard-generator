@@ -22,11 +22,13 @@ export default function DashboardPage() {
   const {
     dataset: ctxDataset, saveDashboard, updateDashboard,
     loadDashboard, setDataset, currentDashboardId,
+    historyLoading,
   } = useData()
   const navigate = useNavigate()
   const location = useLocation()
   const { id } = useParams()
   const hasSaved = useRef(false)
+  const loadedIdRef = useRef<string | null>(null)
 
   const fromHistory = location.state?.fromHistory
   const savedDash = id && id !== 'new' ? loadDashboard(id) : null
@@ -87,6 +89,53 @@ export default function DashboardPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (id && id !== 'new') {
+      if (savedDash && loadedIdRef.current !== id) {
+        setLocalRows(savedDash.dataset.rows)
+        setLocalColumns(savedDash.dataset.columns)
+        setDashTitle(savedDash.name)
+        setWidgets(savedDash.widgets)
+        loadedIdRef.current = id
+      }
+    } else if (id === 'new' && ctxDataset && loadedIdRef.current !== 'new') {
+      setLocalRows(ctxDataset.rows)
+      setLocalColumns(ctxDataset.columns)
+      setDashTitle(ctxDataset.name ?? 'Meu Dashboard')
+      const cols = ctxDataset.columns
+      const xKey = cols[0]
+      const initialWidgets = cols.slice(1).map((yKey, i) => ({
+        id: String(i),
+        type: (i === 0 ? 'bar' : i === 1 ? 'line' : 'pie') as ChartType,
+        title: `${yKey} por ${xKey}`,
+        xKey,
+        yKey,
+        color: COLORS[i % COLORS.length],
+      }))
+      setWidgets(initialWidgets)
+      loadedIdRef.current = 'new'
+    }
+  }, [id, savedDash, ctxDataset])
+
+  useEffect(() => {
+    if (id && id !== 'new' && savedDash) {
+      updateDashboard(id, widgets, undefined, dashTitle)
+    }
+  }, [widgets, dashTitle, id])
+
+  if (historyLoading) {
+    return (
+      <>
+        <Navbar />
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: '#7a8fa6', marginBottom: '1rem' }}>Carregando dashboard...</p>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   const askConfirm = (message: string, action: () => void) => setConfirm({ message, action })
 
   const handleTabChange = (tab: Tab) => {
@@ -104,7 +153,12 @@ export default function DashboardPage() {
 
   const applyDataChanges = () => {
     if (!dataset) return
-    setDataset({ ...dataset, columns: localColumns, rows: localRows })
+    const updatedDataset = { ...dataset, columns: localColumns, rows: localRows }
+    if (id && id !== 'new') {
+      updateDashboard(id, widgets, updatedDataset)
+    } else {
+      setDataset(updatedDataset)
+    }
     setHasUnsavedData(false)
     setActiveTab('charts')
   }
@@ -279,7 +333,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <button onClick={() => navigate('/config', { state: { widgets } })} style={btnGhost}>
+              <button onClick={() => navigate('/config', { state: { widgets, dashboardId: id } })} style={btnGhost}>
                 Configurar
               </button>
               <button onClick={handleExportCSV} style={btnGhost}>Exportar CSV</button>

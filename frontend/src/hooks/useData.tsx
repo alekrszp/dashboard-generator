@@ -17,7 +17,7 @@ interface DataContextType {
   historyLoading: boolean
   historyError: string | null
   saveDashboard: (name: string, dataset: Dataset, widgets: Widget[]) => Promise<string>
-  updateDashboard: (id: string, widgets: Widget[]) => void
+  updateDashboard: (id: string, widgets: Widget[], dataset?: Dataset, name?: string) => void
   deleteDashboard: (id: string) => void
   loadDashboard: (id: string) => SavedDashboard | null
   currentDashboardId: string | null
@@ -29,11 +29,53 @@ const DataContext = createContext<DataContextType | null>(null)
 const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true'
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [dataset, setDataset] = useState<Dataset | null>(null)
-  const [history, setHistory] = useState<SavedDashboard[]>([])
-  const [historyLoading, setHistoryLoading] = useState(false)
+  const [dataset, setDataset] = useState<Dataset | null>(() => {
+    if (!USE_REAL_API) {
+      try {
+        const saved = localStorage.getItem('mock_dataset')
+        return saved ? JSON.parse(saved) : null
+      } catch {
+        return null
+      }
+    }
+    return null
+  })
+  const [history, setHistory] = useState<SavedDashboard[]>(() => {
+    if (!USE_REAL_API) {
+      try {
+        const saved = localStorage.getItem('mock_history')
+        return saved ? JSON.parse(saved) : []
+      } catch {
+        return []
+      }
+    }
+    return []
+  })
+  const [historyLoading, setHistoryLoading] = useState(() => {
+    if (USE_REAL_API) {
+      const token = localStorage.getItem('token')
+      return !!token
+    }
+    return false
+  })
   const [historyError, setHistoryError] = useState<string | null>(null)
   const [currentDashboardId, setCurrentDashboardId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!USE_REAL_API) {
+      localStorage.setItem('mock_history', JSON.stringify(history))
+    }
+  }, [history])
+
+  useEffect(() => {
+    if (!USE_REAL_API) {
+      if (dataset) {
+        localStorage.setItem('mock_dataset', JSON.stringify(dataset))
+      } else {
+        localStorage.removeItem('mock_dataset')
+      }
+    }
+  }, [dataset])
 
   useEffect(() => {
     if (!USE_REAL_API) return
@@ -87,8 +129,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return id
   }
 
-  const updateDashboard = (id: string, widgets: Widget[]) => {
-    setHistory(h => h.map(d => d.id === id ? { ...d, widgets } : d))
+  const updateDashboard = (id: string, widgets: Widget[], updatedDataset?: Dataset, name?: string) => {
+    setHistory(h => h.map(d => d.id === id ? { 
+      ...d, 
+      widgets,
+      dataset: updatedDataset ?? d.dataset,
+      name: name ?? d.name
+    } : d))
     if (USE_REAL_API) updateDashboardOnAPI(id, widgets).catch(() => {})
   }
 
