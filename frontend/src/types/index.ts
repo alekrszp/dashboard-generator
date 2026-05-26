@@ -28,7 +28,7 @@ export interface Widget {
   title: string
   xKey: string
   yKey: string
-  color?: string
+  color: string
 }
 
 export interface Dashboard {

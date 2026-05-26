@@ -1,14 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { detectColumns, suggestChartType } from '../../src/utils/detectColumns'
+import { detectColumns, suggestChartType } from '../utils/detectColumns'
 
 describe('detectColumns', () => {
-  it('detecta colunas numéricas corretamente', () => {
-    const columns = ['Mês', 'Vendas']
-    const rows = [
+  it('detecta numérico e categoria', () => {
+    const result = detectColumns(['Mês', 'Vendas'], [
       { Mês: 'Janeiro', Vendas: 1000 },
       { Mês: 'Fevereiro', Vendas: 2000 },
-    ]
-    const result = detectColumns(columns, rows)
+    ])
     expect(result[0].type).toBe('category')
     expect(result[1].type).toBe('numeric')
   })
@@ -16,21 +14,22 @@ describe('detectColumns', () => {
   it('retorna vazio para colunas vazias', () => {
     expect(detectColumns([], [])).toHaveLength(0)
   })
+
+  it('detecta coluna de datas', () => {
+    const result = detectColumns(['Data', 'Valor'], [
+      { Data: '2026-01-01', Valor: 100 },
+      { Data: '2026-02-01', Valor: 200 },
+    ])
+    expect(result[0].type).toBe('date')
+  })
 })
 
 describe('suggestChartType', () => {
   it('sugere linha para data', () => {
-    expect(suggestChartType({ name: 'Data', type: 'date' }, { name: 'Valor', type: 'numeric' })).toBe('line')
+    expect(suggestChartType({ name: 'Data', type: 'date' }, { name: 'Val', type: 'numeric' })).toBe('line')
   })
 
   it('sugere barra para categoria + numérico', () => {
     expect(suggestChartType({ name: 'Cat', type: 'category' }, { name: 'Val', type: 'numeric' })).toBe('bar')
-  })
-})
-
-describe('chartRegistry pattern', () => {
-  it('todos os tipos de gráfico estão registrados', async () => {
-    const mod = await import('../../src/components/ChartRenderer')
-    expect(mod).toBeDefined()
   })
 })

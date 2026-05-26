@@ -66,15 +66,19 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (dataset && widgets.length > 0 && !hasSaved.current && !fromHistory && id === 'new') {
-      if (!currentDashboardId) {
-        const newId = saveDashboard(dashTitle, dataset, widgets)
+      const doSave = async () => {
+        let newId: string
+        if (!currentDashboardId) {
+          newId = await saveDashboard(dashTitle, dataset, widgets)
+        } else {
+          updateDashboard(currentDashboardId, widgets)
+          newId = currentDashboardId
+        }
         navigate(`/dashboard/${newId}`, { replace: true, state: { widgets, fromHistory: false } })
-      } else {
-        updateDashboard(currentDashboardId, widgets)
-        navigate(`/dashboard/${currentDashboardId}`, { replace: true, state: { widgets, fromHistory: false } })
+        hasSaved.current = true
+        setSaved(true)
       }
-      hasSaved.current = true
-      setSaved(true)
+      doSave()
     }
   }, [])
 
@@ -292,12 +296,12 @@ export default function DashboardPage() {
           {activeTab === 'charts' && (
             <div ref={exportRef}>
               <DragDropContext onDragEnd={onDragEnd}>
-                <Droppable droppableId="widgets" direction="horizontal">
+                <Droppable droppableId="widgets" direction="vertical">
                   {(provided) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '1rem' }}
+                      style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
                     >
                       {widgets.map((w, index) => (
                         <WidgetCard

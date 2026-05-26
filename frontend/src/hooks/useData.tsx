@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { Dataset, Widget } from '@/types'
+import { fetchDashboards, saveDataset, saveDashboardToAPI, updateDashboardOnAPI } from '@/services/dataService'
 
 export interface SavedDashboard {
   id: string
@@ -13,7 +14,8 @@ interface DataContextType {
   dataset: Dataset | null
   setDataset: (dataset: Dataset | null) => void
   history: SavedDashboard[]
-  saveDashboard: (name: string, dataset: Dataset, widgets: Widget[]) => string
+  historyLoading: boolean
+  saveDashboard: (name: string, dataset: Dataset, widgets: Widget[]) => Promise<string>
   updateDashboard: (id: string, widgets: Widget[]) => void
   deleteDashboard: (id: string) => void
   loadDashboard: (id: string) => SavedDashboard | null
@@ -23,17 +25,59 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | null>(null)
 
+const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true'
+
 export function DataProvider({ children }: { children: ReactNode }) {
   const [dataset, setDataset] = useState<Dataset | null>(null)
   const [history, setHistory] = useState<SavedDashboard[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
   const [currentDashboardId, setCurrentDashboardId] = useState<string | null>(null)
 
-  const saveDashboard = (name: string, dataset: Dataset, widgets: Widget[]): string => {
-    const id = Date.now().toString()
+  useEffect(() => {
+    if (!USE_REAL_API) return
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    setHistoryLoading(true)
+    fetchDashboards()
+      .then((items) => {
+        const mapped: SavedDashboard[] = items.map((d: any) => ({
+          id: d.id,
+          name: d.name,
+          dataset: d.dataset ?? {
+            id: d.datasetId,
+            name: d.name,
+            columns: d.dataset?.columns ?? [],
+            rows: d.dataset?.rows ?? [],
+            createdAt: d.createdAt,
+          },
+          widgets: d.widgets,
+          createdAt: d.createdAt,
+        }))
+        setHistory(mapped)
+      })
+      .catch(() => {})
+      .finally(() => setHistoryLoading(false))
+  }, [])
+
+  const saveDashboard = async (name: string, dataset: Dataset, widgets: Widget[]): Promise<string> => {
+    let finalDataset = dataset
+    let id = Date.now().toString()
+
+    if (USE_REAL_API) {
+      try {
+        const savedDataset = await saveDataset(dataset)
+        finalDataset = savedDataset
+        id = await saveDashboardToAPI(name, savedDataset.id, widgets)
+      } catch {
+        id = Date.now().toString()
+      }
+    }
+
     const newDash: SavedDashboard = {
       id,
       name,
-      dataset,
+      dataset: finalDataset,
       widgets,
       createdAt: new Date().toISOString(),
     }
@@ -44,6 +88,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateDashboard = (id: string, widgets: Widget[]) => {
     setHistory(h => h.map(d => d.id === id ? { ...d, widgets } : d))
+    if (USE_REAL_API) updateDashboardOnAPI(id, widgets).catch(() => {})
   }
 
   const deleteDashboard = (id: string) => {
@@ -51,14 +96,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (currentDashboardId === id) setCurrentDashboardId(null)
   }
 
-  const loadDashboard = (id: string) => {
-    return history.find(d => d.id === id) ?? null
-  }
+  const loadDashboard = (id: string) => history.find(d => d.id === id) ?? null
 
   return (
     <DataContext.Provider value={{
       dataset, setDataset,
-      history, saveDashboard, updateDashboard, deleteDashboard, loadDashboard,
+      history, historyLoading,
+      saveDashboard, updateDashboard, deleteDashboard, loadDashboard,
       currentDashboardId, setCurrentDashboardId,
     }}>
       {children}

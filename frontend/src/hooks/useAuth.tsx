@@ -14,12 +14,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-const USE_REAL_API = true
+const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem('user')
-    return stored ? JSON.parse(stored) : null
+    try {
+      const stored = localStorage.getItem('user')
+      return stored ? JSON.parse(stored) : null
+    } catch {
+      return null
+    }
   })
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
 
@@ -28,6 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(token)
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(user))
+  }
+
+  const clearSession = () => {
+    setUser(null)
+    setToken(null)
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
   }
 
   const login = async (email: string, password: string) => {
@@ -67,12 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('user', JSON.stringify(updated))
   }
 
-  const logout = () => {
-    setUser(null)
-    setToken(null)
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-  }
+  const logout = () => clearSession()
 
   return (
     <AuthContext.Provider value={{ user, token, login, register, updateUser, logout, isAuthenticated: !!token }}>

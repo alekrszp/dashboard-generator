@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { useData, SavedDashboard } from '@/hooks/useData'
+import { deleteDashboardOnAPI } from '@/services/dataService'
+import { formatDateTime } from '@/utils/formatters'
 import Navbar from '@/components/Navbar'
 
 export default function HistoryPage() {
-  const { history, setDataset, deleteDashboard } = useData()
+  const { history, historyLoading, setDataset, deleteDashboard } = useData()
   const navigate = useNavigate()
 
   const handleOpen = (dash: SavedDashboard) => {
@@ -11,9 +13,10 @@ export default function HistoryPage() {
     navigate(`/dashboard/${dash.id}`, { state: { widgets: dash.widgets, fromHistory: true } })
   }
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
     deleteDashboard(id)
+    try { await deleteDashboardOnAPI(id) } catch { /* silently fail */ }
   }
 
   return (
@@ -28,7 +31,7 @@ export default function HistoryPage() {
                 Meus Dashboards
               </h1>
               <p style={{ fontSize: '13px', color: '#7a8fa6', marginTop: '4px' }}>
-                {history.length} dashboard{history.length !== 1 ? 's' : ''} nesta sessão
+                {historyLoading ? 'Carregando...' : `${history.length} dashboard${history.length !== 1 ? 's' : ''} salvos`}
               </p>
             </div>
             <button onClick={() => navigate('/')} style={{
@@ -40,7 +43,11 @@ export default function HistoryPage() {
             </button>
           </div>
 
-          {history.length === 0 ? (
+          {historyLoading ? (
+            <div style={{ textAlign: 'center', padding: '4rem', color: '#7a8fa6', fontSize: '14px' }}>
+              Carregando dashboards...
+            </div>
+          ) : history.length === 0 ? (
             <div style={{
               background: 'rgba(13, 25, 45, 0.85)',
               border: '1px dashed rgba(100, 160, 255, 0.2)',
@@ -79,7 +86,7 @@ export default function HistoryPage() {
                         {dash.name}
                       </p>
                       <p style={{ fontSize: '12px', color: '#7a8fa6', marginTop: '3px' }}>
-                        {new Date(dash.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        {formatDateTime(dash.createdAt)}
                       </p>
                     </div>
                     <button

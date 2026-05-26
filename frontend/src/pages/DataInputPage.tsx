@@ -28,6 +28,7 @@ export default function DataInputPage() {
   const [tab, setTab] = useState<Tab>('file')
   const [fileName, setFileName] = useState('')
   const [preview, setPreview] = useState<DatasetRow[]>([])
+  const [allRows, setAllRows] = useState<DatasetRow[]>([])
   const [columns, setColumns] = useState<string[]>([])
   const [datasetName, setDatasetName] = useState('Meu Dataset')
   const [showExample, setShowExample] = useState(false)
@@ -47,6 +48,7 @@ export default function DataInputPage() {
         const data = XLSX.utils.sheet_to_json<DatasetRow>(ws)
         const cols = data.length > 0 ? Object.keys(data[0]) : []
         setColumns(cols)
+        setAllRows(data)
         setPreview(data.slice(0, 10))
       }
       reader.readAsBinaryString(file)
@@ -58,8 +60,10 @@ export default function DataInputPage() {
           header: true, skipEmptyLines: true, dynamicTyping: true,
           complete: (result) => {
             const cols = result.meta.fields ?? []
+            const rows = result.data as DatasetRow[]
             setColumns(cols)
-            setPreview(result.data.slice(0, 10) as DatasetRow[])
+            setAllRows(rows)
+            setPreview(rows.slice(0, 10))
           },
         })
       }
@@ -86,7 +90,7 @@ export default function DataInputPage() {
     if (tab === 'file') {
       if (!columns.length) return alert('Importe um arquivo primeiro!')
       finalCols = columns
-      finalRows = preview
+      finalRows = allRows
     } else {
       finalCols = manualCols
       finalRows = manualRows.map(row =>
@@ -162,7 +166,7 @@ export default function DataInputPage() {
               {preview.length > 0 && (
                 <div style={{ marginTop: '1.5rem' }}>
                   <p style={{ fontSize: '12px', color: '#7a8fa6', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Preview ({preview.length} linhas)
+                    Preview ({preview.length} de {allRows.length} linhas)
                   </p>
                   <DataTable columns={columns} rows={preview} />
                 </div>

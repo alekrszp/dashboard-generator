@@ -1,9 +1,7 @@
 import api from './api'
 import { Dataset, Widget } from '@/types'
 
-// trocar USE_REAL_API para true quando o
-// backend estiver pronto
-const USE_REAL_API = true
+const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true'
 
 export async function saveDataset(dataset: Dataset): Promise<Dataset> {
   if (USE_REAL_API) {
@@ -35,6 +33,12 @@ export async function updateDashboardOnAPI(
 ): Promise<void> {
   if (USE_REAL_API) {
     await api.put(`/dashboards/${id}`, { widgets })
+  }
+}
+
+export async function deleteDashboardOnAPI(id: string): Promise<void> {
+  if (USE_REAL_API) {
+    await api.delete(`/dashboards/${id}`)
   }
 }
 
